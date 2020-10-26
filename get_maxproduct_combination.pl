@@ -6,10 +6,10 @@ use autodie;
 
 use Data::Dumper;
 
-my $string = qq{   08 02 02 22\n
-                   49 49 49 99\n
-                   81 49 49 31\n
-                   01 70 70 54  };
+my $string = qq{   08 02 12 22\n
+                   49 49 29 99\n
+                   81 49 39 31\n
+                   01 70 40 54  };
 
 main($string);
 
@@ -33,13 +33,14 @@ sub main {
 
 sub get_max_product {
 
-  my @matrix      = @_;
+  my @matrix                 = @_;
   my $max_product_row_column = 0;
-  my $max_product_diagonaly = 0;
+  my $max_product_diagonaly  = 0;
 
   for ( my $m = 0 ; $m <= $#matrix ; $m++ ) {
     for ( my $n = 0 ; $n <= $#matrix ; $n++ ) {
-      $max_product_row_column = get_max_product_row_column( $max_product_row_column, $m, $n, @matrix );
+
+      #$max_product_row_column = get_max_product_row_column( $max_product_row_column, $m, $n, @matrix );
       $max_product_diagonaly = get_max_product_diagonaly( $max_product_diagonaly, $m, $n, @matrix );
     }
     print "\n";
@@ -54,15 +55,15 @@ sub get_max_product_row_column {
 
   print "This is value for - " . "$matrix[$a][$b]" . "\n";
 
-  if ( $b - 1 >= 0 && $b - 2 >= 0 && $b - 3 >= 0 ) {
+  if ( travers_for_index($b) ) {
     my $product_left = multiply_four_numbers(
       set_if_defined( $matrix[$a][$b] ),
       set_if_defined( $matrix[$a][ $b - 1 ] ),
       set_if_defined( $matrix[$a][ $b - 2 ] ),
       set_if_defined( $matrix[$a][ $b - 3 ] )
     );
-    $max_product = ( $product_left > $max_product ) ? $product_left : $max_product ; 
     print "Value for left traversing - " . $product_left . "\n";
+    $max_product = ( $product_left > $max_product ) ? $product_left : $max_product;
   } else {
     print "We will not left travers for - " . $matrix[$a][$b] . "\n";
   }
@@ -74,21 +75,73 @@ sub get_max_product_row_column {
     set_if_defined( $matrix[$a][ $b + 1 ] )
   );
   print "Value for right traversing - " . $product_right . "\n";
-  $max_product = ( $product_right > $max_product ) ? $product_right : $max_product ; 
+  $max_product = ( $product_right > $max_product ) ? $product_right : $max_product;
 
-  return $max_product ; 
+  return $max_product;
 }
 
 sub get_max_product_diagonaly {
 
   my ( $max_product, $a, $b, @matrix ) = (@_);
 
-  #08 02 02 22
-  #49 49 49 99
-  #81 49 49 31
-  #01 70 70 54
+  print "This is value for - " . "$matrix[$a][$b]" . "\n";
 
-    return 0 ; 
+  if ( travers_for_index($a) && travers_for_index($b) ) {
+    my $product_left = multiply_four_numbers(
+      set_if_defined( $matrix[$a][$b] ),
+      set_if_defined( $matrix[ $a - 1 ][ $b - 1 ] ),
+      set_if_defined( $matrix[ $a - 2 ][ $b - 2 ] ),
+      set_if_defined( $matrix[ $a - 3 ][ $b - 3 ] )
+    );
+    print "Value for left up diagonal traversing - " . $product_left . "\n";
+    $max_product = ( $product_left > $max_product ) ? $product_left : $max_product;
+  } else {
+    print "We will not left up diagonals travers for - " . $matrix[$a][$b] . "\n";
+  }
+
+  if ( travers_for_index($b) ) {
+    my $product_left = multiply_four_numbers(
+      set_if_defined( $matrix[$a][$b] ),
+      set_if_defined( $matrix[ $a + 1 ][ $b - 1 ] ),
+      set_if_defined( $matrix[ $a + 2 ][ $b - 2 ] ),
+      set_if_defined( $matrix[ $a + 3 ][ $b - 3 ] )
+    );
+    print "Value for left down diagonal traversing - " . $product_left . "\n";
+    $max_product = ( $product_left > $max_product ) ? $product_left : $max_product;
+  } else {
+    print "We will not left down diagonals travers for - " . $matrix[$a][$b] . "\n";
+  }
+
+  if ( travers_for_index($a) ) {
+    my $product_right = multiply_four_numbers(
+      set_if_defined( $matrix[$a][$b] ),
+      set_if_defined( $matrix[ $a - 1 ][ $b + 1 ] ),
+      set_if_defined( $matrix[ $a - 2 ][ $b + 2 ] ),
+      set_if_defined( $matrix[ $a - 3 ][ $b + 3 ] )
+    );
+    print "Value for right up diagonal traversing - " . $product_right . "\n";
+    $max_product = ( $product_right > $max_product ) ? $product_right : $max_product;
+  } else {
+    print "We will not right up travers for - " . $matrix[$a][$b] . "\n";
+  }
+
+  my $product_right = multiply_four_numbers(
+    set_if_defined( $matrix[$a][$b] ),
+    set_if_defined( $matrix[ $a + 1 ][ $b + 1 ] ),
+    set_if_defined( $matrix[ $a + 2 ][ $b + 2 ] ),
+    set_if_defined( $matrix[ $a + 3 ][ $b + 3 ] )
+  );
+  print "Value for right down diagonal traversing - " . $product_right . "\n";
+  $max_product = ( $product_right > $max_product ) ? $product_right : $max_product;
+
+  return $max_product;
+
+}
+
+sub travers_for_index {
+
+  my $index = shift;
+  return ( $index - 1 >= 0 && $index - 2 >= 0 && $index - 3 >= 0 ) ? return 1 : 0;
 }
 
 sub set_if_defined {
@@ -105,7 +158,7 @@ sub multiply_four_numbers {
   my $value3 = shift;
   my $value4 = shift;
 
-  return $value1 * $value2 * $value2 * $value4;
+  return $value1 * $value2 * $value3 * $value4;
 
 }
 __END__
